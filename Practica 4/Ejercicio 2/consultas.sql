@@ -1,4 +1,3 @@
--- Consultas ejercicio 2
 USE ejercicio2;
 
 -- Ejercicio 1
@@ -39,18 +38,34 @@ FROM VIAJE v
 WHERE (v.razon_social = 'Taxi Y' AND cpDestino = 3)
 GROUP BY razon_social;
 
--- EJERCICIO 6
+-- EJERCICIO 6 consultar si esta bien
 SELECT nombre, apellido, direccion, telefono
 FROM cliente
 WHERE not exists (
-	SELECT * 
+	SELECT a.razon_social
 	FROM Agencia a
     WHERE not exists (
-		SELECT *
-        FROM Cliente c
-        INNER JOIN Viaje v on (a.razon_social = v.razon_social)
-        WHERE 
+		SELECT v.razon_social
+        FROM viaje v
+		WHERE (V.DNI = C.DNI AND v.razon_social = a.razon_social)
     )
-    
-inner join cuenta c on (pc.nroCuenta=c.nroCuenta)
- where c.nombreSucursal=s.nombreSucursal and               	        pc.codCliente=cliente.codCliente))
+);
+
+-- EJERCICIO 7
+UPDATE cliente
+SET telefono = '221 4400897'
+WHERE dni = '38495444';
+
+-- EJERCICIO 8 
+-- preguntar por enunciado mayor a que?
+
+-- EJERCICIO 9
+SELECT nombre, apellido, direccion, telefono, count(dni) as cant
+FROM cliente c
+NATURAL JOIN viaje v
+GROUP BY nombre, apellido, direccion, telefono
+HAVING cant >= 10;
+
+-- EJERCICIO 10
+DELETE FROM CLIENTE 
+WHERE dni = '40325692'

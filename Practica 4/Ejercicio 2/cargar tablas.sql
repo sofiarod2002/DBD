@@ -52,6 +52,11 @@ INSERT INTO VIAJE (FECHA, HORA, DNI, cpOrigen, cpDestino, razon_social, descripc
     ('2022-09-01', '01:00:00', '67890123', 9, 10, 'Agencia 9', 'Viaje nocturno a Ciudad Feliz'),
     ('2018-08-08', '03:00:00', '34567890', 10, 1, 'Agencia 10', 'Viaje a La Plata');
 
+-- agrego viajes para probar ejercicio 9
+INSERT INTO VIAJE (FECHA, HORA, DNI, cpOrigen, cpDestino, razon_social, descripcion) VALUES
+    ('2020-01-15', '20:30:00', '12345678', 1, 2, 'Agencia 2', 'Viaje sin problemas'),
+    ('2019-03-15', '09:30:00', '12345678', 1, 2, 'Agencia 5', 'Viaje demorado a Cordoba'),
+    ('2015-01-15', '08:40:00', '12345678', 1, 2, 'Agencia 6', 'Viaje a la costa atlantica');
 -- cambie destino del cliente 14
 UPDATE viaje
 SET cpDestino =  2
