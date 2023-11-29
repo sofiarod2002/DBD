@@ -71,7 +71,18 @@ WHERE j.dni NOT IN (
 );
 
 -- EJERCICIO 8
--- es con division tengo que pensarlo
+SELECT j.nombre, j.apellido
+FROM jugadores j 
+WHERE NOT EXISTS (
+	SELECT *
+    FROM Club c 
+    WHERE NOT EXISTS (
+		SELECT *
+        FROM clubjugador cj
+        WHERE (cj.codigoClub = c.codigoClub AND cj.DNI = j.DNI)
+	)
+);
+
 -- EJERCICIO 9
 INSERT INTO Club (codigoClub, nombre, anioFundacion, codigoCiudad) VALUES
 (1234, 'Estrella de Berisso', 1921, 'Beriso'); -- como hago aca para poner berisso, pongo el codigo directamente?
