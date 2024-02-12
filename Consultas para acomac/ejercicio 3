@@ -1,0 +1,86 @@
+-- Ejercicio 3
+-- 1
+SELECT c.nombre, c.anioFundacion
+FROM Club c
+INNER JOIN Ciudad ci ON (c.codigoCiudad = ci.codigoCiudad)
+WHERE ci.nombre = 'La Plata' AND c.codigoClub NOT IN (
+  SELECT e.codigoClub
+  FROM Estadio e
+);
+
+-- 2
+SELECT DISTINCT c.nombre
+FROM Club c
+WHERE c.codigoClub NOT IN (
+  SELECT cj.codigoClub
+  FROM ClubJugador cj
+  NATURAL JOIN Jugador j
+  INNER JOIN Ciudad ci ON (j.codigoCiudad = ci.codigoCiudad)
+  WHERE (ci.nombre = 'Berisso')
+);
+
+-- 3 mostrar si esta bien el natural join y el inner join
+SELECT j.dni, j.nombre, j.apellido
+FROM Jugador j
+NATURAL JOIN ClubJugador cj
+INNER JOIN Club c ON (c.codigoClub = cj.codigoClub)
+WHERE c.nombre= 'Gimnasia' AND j.dni IN (
+  SELECT j2.dni
+  FROM Jugador j2
+  NATURAL JOIN ClubJugador cj2
+  INNER JOIN Club c2 ON (c2.codigoClub = cj2.codigoClub)
+  WHERE c2.nombre= 'Esgrima La Plata'
+);
+
+-- 4 -- consultar aveces me cuesta entender si puede ser una consulta o tienen que ser dos
+SELECT j.dni, j.nombre, j.apellido
+FROM Jugador j
+NATURAL JOIN ClubJugador cj
+INNER JOIN Club c ON (cj.codigoClub = c.codigoCiudad)
+INNER JOIN Ciudad ci ON (c.codigoCiudad = ci.codigoCiudad)
+WHERE ci.nombre= 'Cordoba' AND j.dni IN (
+  SELECT j.dni
+  FROM Jugador j
+  WHERE j.edad > 29
+);
+
+-- 5 preguntar si esta bien
+SELECT c.nombre, AVG (j.edad) as edad_promedio
+FROM Club c
+NATURAL JOIN ClubJugador cj
+INNER JOIN Jugador j ON (cj.dni = j.dni)
+GROUP BY c.codigoClub, c.nombre;
+
+-- 6 preguntar si esta bien
+SELECT j.nombre, j.apellido, j.edad, COUNT(j.dni) as cantidad_clubes
+FROM Jugador j
+NATURAL JOIN ClubJugador
+GROUP BY j.nombre, j.apellido, j.edad;
+
+-- 7
+SELECT c.nombre
+FROM Club c
+WHERE c.codigoClub NOT IN (
+  SELECT cj.codigoClub
+  FROM ClubJugador cj
+  NATURAL JOIN Jugador j
+  INNER JOIN Ciudad ci ON (ci.codigoCiudad = j.codigoCiudad)
+  WHERE ci.nombre = 'Mar del Plata'
+);
+
+-- 8
+SELECT j.nombre, j.apellido
+FROM Jugador j
+  WHERE NOT EXISTS (
+  SELECT *
+  FROM Club c
+  WHERE NOT EXISTS (
+    SELECT *
+    FROM ClubJugador cj
+    WHERE (cj.dni = j.dni AND cj.codigoClub = c.codigoClub)
+)
+);
+
+-- 9
+INSERT INTO CLUB (codigoClub, nombre, anioFundacion, codigoCiudad)
+VALUES (1234, 'Estrella de Berisso', '1921', '015');

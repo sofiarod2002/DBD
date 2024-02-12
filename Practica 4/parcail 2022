@@ -1,0 +1,53 @@
+-- 2
+SELECT c.nombre, c.apellido, c.cuit
+FROM Cliente c
+WHERE NOT EXISTS(
+  SELECT *
+  FROM PRODUCTO prod
+  WHERE NOT EXISTS(
+    SELECT *
+    FROM PEDIDO p
+    WHERE (p.dni = c.dni) AND (p.codProd = prod.codProd) AND (p.fechaPed BETWEEN "18/12/2022" AND "18/12/2023")
+  )
+);
+
+-- 3
+SELECT p.nroPedido, p.fechaPed, prod.cantProd, pp.cantPed, ep.nroRemito, ep.fechaEnt, ep.cantEnt
+FROM pedido p
+INNER JOIN PedProd pp ON (pp.nroPed = p.nroPed)
+INNER JOIN EntProd ep ON (ep.nroPed = p.nroPed)
+WHERE (pp.fechaPed > ep.fechaEnt) AND p.codProd IN (
+  SELECT pe.codProd
+  FROM pedido pe
+  WHERE pe.fecha BETWEEN '2023-11-18' AND '2023-12-18'
+)
+ORDER BY p.nroPedido, prod.codProd, ep.fechaEnt
+
+-- 4
+SELECT p.nroPed, p.fechaPed, prod.codProd, pp.cantPed, c.cuit,c.nombreClte,p.dirEntrega
+FROM PEDIDO p
+INNER JOIN PedProd pp ON (pp.nroPed = p.nroPed)
+INNER JOIN PRODUCTO prod ON (prod.codProd = p.codProd)
+WHERE pe.fecha BETWEEN '2023-11-18' AND '2023-12-18' AND p.nroPed NOT IN (
+  SELECT e.nroPed
+  FROM Entrega e
+)
+ORDER BY p.nroPed;
+
+-- 5
+SELECT p.nroPed, p.fechaPed, pp.codProd, pp.cantPed, e.cantEnt
+FROM PEDIDO p
+LEFT JOIN EntProd e ON (p.nroPed = e.nroPed)
+INNER JOIN PedProd pp ON (pp.nroPed = p.nroPed)
+WHERE p.fecha BETWEEN '2023-11-18' AND '2023-12-18'
+ORDEY BY p.nroPedido, e.codProd
+
+-- 6
+SELECT c.nroClte, c.telefono, p.fecha, pp.cantPed, SUM(pp.precio) as monto
+FROM Cliente c
+INNER JOIN PedProd pp ON (pp.nroClte = c.nroClte)
+INNER JOIN Pedido p ON (p.nroPed = pp.nroPed)
+INNER JOIN Entrega e ON (p.nroPed = e.nroPed)
+WHERE pe.fecha BETWEEN '2023-11-18' AND '2023-12-18'
+GROUP BY e.nroPed
+ORDER BY DESC SUM(*)

@@ -1,0 +1,92 @@
+-- Ejercicio 2
+-- 1
+SELECT a.razon_social, a.direccion, a.telefono
+FROM Agencia a
+NATURAL JOIN viaje v
+INNER JOIN CLIENTE cl ON (cl.dni = v.dni)
+WHERE cl.apellido='Roma' AND v.cpOrigen IN (
+SELECT c.codigopostal
+  FROM Ciudad c
+  WHERE c.nombreCiudad= 'La Plata'
+)
+ORDER BY a.razon_social,a.telefono;
+
+-- 2
+SELECT v.fecha, f.hora, c.dni, c.nombre, c.apellido, c.telefono, c.direccion, v.cpOriden, v.cpDestino
+FROM Viaje v
+INNER JOIN CLIENTE c ON (c.dni = v.dni)
+WHERE YEAR(v.fecha)=2019 AND MONTH(V.FECHA)=1 AND v.descripcion LIKE '%demorado%';
+
+-- 3
+SELECT *
+FROM Agencia a
+NATURAL JOIN Viaje v
+WHERE YEAR(v.fecha)=2019
+OR a.razon_social IN (
+  SELECT *
+  FROM Agencia a
+  WHERE a.email LIKE '%@hmail.com'
+);
+
+-- 4
+SELECT DISTINCT c.dni, c.nombre, c.apellido, c.telefono, c.direccion -- va como dato el dni si es la cp ?
+FROM Cliente c
+NATURAL JOIN Viaje v
+INNER JOIN Ciudad ci (v.cpDestino = ci.codigopostal)
+WHERE ci.nombreCiudad='Coronel Brandsen' AND c.dni NOT IN (
+  SELECT cl.dni
+  FROM Cliente cl
+  NATURAL JOIN Viaje vi
+  INNER JOIN Ciudad ci2 (vi.cpDestino = ci2.codigopostal)
+  WHERE ci2.nombreCiudad !='Coronel Brandsen'
+);
+
+-- 5
+SELECT COUNT(a.razon_social) as cantidad_viajes
+FROM Agencia a
+NATURAL JOIN Viaje v
+WHERE a.razon_social= 'TAXI Y' AND a.cpDestino IN (
+  SELECT codigopostal
+  FROM Ciudad ci
+  WHERE ci.nombreCiudad='Villa Elisa'
+);
+
+-- 6
+SELECT c.nombre, c.apellido, c.telefono, c.direccion
+FROM Cliente c
+WHERE NOT EXISTS (
+  SELECT *
+  FROM Agencia a
+  WHERE NOT EXISTS(
+    SELECT *
+    FROM Viaje v
+    WHERE (v.dni = c.dni AND a.razon_social = v.razon_social)
+  )
+);
+
+-- 7
+UPDATE Cliente
+SET telefono = 221-4400897
+WHERE dni = 38495444;
+
+-- 8 mostrar si esta bien resuelto
+SELECT a.razon_social, a.direccion, a.telefono
+FROM Agencia a
+NATURAL JOIN Viaje v
+GROUP BY a.razon_social, a.direccion, a.telefono
+HAVING COUNT(*) >ALL (
+  SELECT COUNT (*)
+  FROM Viaje v2
+  GROUP BY v2.razon_social
+);
+
+-- 9 mostrar si esta bien
+SELECT c.nombre, c.apellido, c.telefono, c.direccion
+FROM Cliente c
+NATURAL JOIN VIAJE v
+GROUP BY c.dni, c.nombre, c.apellido, c.telefono, c.direccion
+WHERE COUNT(*)> 10;
+
+-- 10
+DELETE FROM Cliente
+WHERE dni = 40325692
