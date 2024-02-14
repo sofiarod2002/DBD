@@ -1,0 +1,110 @@
+-- Ejercicio 1
+
+-- 1
+SELECT c.nombre, c.apellido, c.dni, c.telefono, c.direccion
+FROM Cliente c
+WHERE c.apellido LIKE "PE%"
+ORDER BY c.dni;
+-- hay alguna diferencia entre usar "" o ''
+
+-- 2
+SELECT DISTINCT c.nombre, c.apellido, c.dni, c.telefono, c.direccion
+FROM Cliente c
+NATURAL JOIN Factura f
+WHERE YEAR(f.fecha)=2017 AND
+c.dni NOT IN(
+  SELECT cl.dni
+  FROM Cliente cl
+  NATURAL JOIN Factura fa
+  WHERE YEAR(fa.fecha)!=2017
+);
+
+-- 3
+SELECT DISTINCT p.descripcion, p.nombreP, p.precio, p.stock
+FROM Producto p
+NATURAL JOIN Detalle
+NATURAL JOIN Factura
+NATURAL JOIN Cliente c
+WHERE c.dni = 45789456
+AND p.idProducto NOT IN (
+  SELECT pr.idProducto
+  FROM Producto pr
+  NATURAL JOIN Detalle
+  NATURAL JOIN Factura
+  NATURAL JOIN Cliente cl
+  WHERE cl.apellido = "Garcia"
+);
+
+-- 4
+SELECT p.descripcion, p.nombreP, p.precio, p.stock
+FROM Producto p
+NATURAL JOIN Detalle
+NATURAL JOIN Factura
+NATURAL JOIN Cliente c
+WHERE c.telefono NOT LIKE '%221' -- esto se puede hacer?
+ORDER BY p.nombreP;
+
+-- 5
+SELECT  p.nombreP, p.precio, p.stock, p.descripcion, COUNT(DISTINCT p.idProducto) as cantidad_ventas
+FROM Producto p
+LEFT JOIN JOIN Detalle d ON (p.idProducto = d.idProducto);
+-- en este caso hace falta agrupar?
+
+-- 6
+SELECT c.nombre, c.apellido, c.dni, c.telefono, c.direccion
+FROM Cliente c
+NATURAL JOIN Detalle
+NATURAL JOIN Factura
+NATURAL JOIN Producto p
+WHERE p.nombreP = "prod1" OR p.nombreP = "prod2" -- esto es asi o tendria que hacer otra consulta para prod2?
+AND c.dni NOT IN (
+  SELECT cl.dni
+  FROM Cliente cl
+  NATURAL JOIN Detalle
+  NATURAL JOIN Factura
+  NATURAL JOIN Producto pr
+  WHERE pr.nombreP = "prod3"
+);
+
+-- 7
+SELECT f.nroTicket, f.total, f.fecha, f.hora, c.dni
+FROM Factura f
+NATURAL JOIN Detalle
+NATURAL JOIN Cliente c
+NATURAL JOIN Producto
+WHERE YEAR(f.fecha)=2019
+OR f.nroTicket IN (
+  SELECT fa.nroTicket
+  FROM Cliente
+  NATURAL JOIN Detalle
+  NATURAL JOIN Factura fa
+  NATURAL JOIN Producto p
+  WHERE p.nombreP = "prod38"
+); -- se puede hacer esto en una consulta?
+
+-- 8
+INSERT INTO Cliente (id,nombre, apellido, dni, telefono, direccion)
+VALUES ( 500002,'Jorge Luis', 'Castor', 40578999, 221-4400789, '11 entre 500 y 501 nro:2857');
+
+-- 9
+SELECT f.nroTicket, f.total, f.fecha, f.hora
+FROM Cliente c
+NATURAL JOIN Detalle
+NATURAL JOIN Factura f
+NATURAL JOIN Producto
+WHERE c.nombre = 'Jorge' and c.apellido= 'Perez'
+AND f.nroTicket IN (
+  SELECT fa.nroTicket
+  FROM Cliente
+  NATURAL JOIN Detalle
+  NATURAL JOIN Factura fa
+  NATURAL JOIN Producto p
+  WHERE p.nombreP = "Z" AND fa.nroTicket = f.nroTicket -- esto es necesario para chequear que sean las mismas facturas?
+);
+
+-- 10
+SELECT c.nombre, c.apellido, c.dni
+FROM Cliente c
+NATURAL JOIN Factura f
+GROUP BY c.nombre, c.apellido, c.dni
+HAVING SUM(f.total)>10000000;

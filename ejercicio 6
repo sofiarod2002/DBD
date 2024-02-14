@@ -1,0 +1,100 @@
+-- Ejercicio 6
+-- 1
+SELECT r.nombre, r.stock, r.precio
+FROM Repuesto r
+ORDER BY r.precio;
+
+-- 2 esta bien, hace falta distinct?
+SELECT r.nombre, r.stock, r.precio
+FROM Repuesto r
+INNER JOIN RepuestoReparacion rr ON (rr.codRep = r.codRep)
+INNER JOIN Reparacion rep ON (rr.nroReparac = rep.nroReparac)
+WHERE YEAR(rep.fecha)=2019 AND rep.nroReparac NOT IN (
+  SELECT *
+  FROM Raparacion r2
+  INNER JOIN Tecnico t ON (r2.codTEc = t.codTEc)
+  WHERE t.nombre='Jose Gonsalez';
+);
+
+-- 3 esta bien?
+SELECT t.nombre, t.especialidad
+FROM Tecnico t
+WHERE t.codTec NOT IN (
+  SELECT *
+  From Reparacion
+);
+
+-- 4
+SELECT t.nombre, t.especialidad
+FROM Tecnico t
+INNER JOIN Reparacion r ON (r.codTec = t.codTec)
+WHERE YEAR (r.fecha)=2018 AND t.codTec NOT IN (
+  SELECT *
+  FROM Reparacion r2
+  WHERE YEAR(r2.fecha)!=2018
+);
+
+-- 5 esta bien?
+SELECT r.nombre, r.stock COUNT(distinct t.codTec) as cantidad_tecnicos
+FROM Repuesto r
+LEFT JOIN RepuestoReparacion rr ON (r.codRep = rr.codRep)
+INNER JOIN Reparacion rep ON (rr.nroReparac = rep.nroReparac)
+GROUP BY r.codRep, r.nombre, r.stock;
+
+-- 6
+SELECT t.nombre, t.especialidad
+FROM Tecnico t
+INNER JOIN Reparacion r ON (r.codTec = t.codTec)
+GROUP BY t.codTec, t.nombre, t.especialidad
+HAVING COUNT(*)>ALL(
+  SELECT COUNT(*)
+  FROM Reparacion r2
+  GROUP BY R2.codTec
+)
+UNION
+(
+SELECT t.nombre, t.especialidad
+FROM Tecnico t
+INNER JOIN Reparacion r ON (r.codTec = t.codTec)
+GROUP BY t.codTec, t.nombre, t.especialidad
+HAVING COUNT(*)<ALL(
+  SELECT COUNT(*)
+  FROM Reparacion r2
+  GROUP BY R2.codTec
+)
+);
+
+-- 7
+SELECT r.nombre, r.stock, r.precio
+FROM Repuesto r
+INNER JOIN RepuestoReparacion rr ON (r.codRep = rr.codRep)
+INNER JOIN Reparacion rep ON (r.nroReparac = rr.nroReparac)
+WHERE r.stock>0 AND rep.precio_total<10000;
+
+-- 8
+SELECT rep.fecha, r.precio, rep.precio_total
+FROM Repuesto Reparacion rep
+INNER JOIN RepuestoReparacion rr ON (r.codRep = rr.codRep)
+INNER JOIN Repuesto r ON (r.nroReparac = rr.nroReparac)
+WHERE r.precio BETWEEN 1000 and 5000;
+
+-- 9
+SELECT r.nombre, r.stock, r.precio
+FROM Repuesto r
+WHERE NOT EXISTS(
+  SELECT *
+  FROM Reparacion rep
+  WHERE NOT EXISTS(
+    SELECT *
+    FROM RepuestoReparacion rr
+    WHERE (rr.codRep = r.codRep And rr.nroReparac = rep.nroReparac)
+  )
+);
+
+-- 10 donde pongo el distinct para los repeustos distintos? 
+SELECT r.fecha, r.precio_total, t.nombre
+FROM Reparacion r
+INNER JOIN Tecnico t ON (r.codTec = t.codTec)
+INNER JOIN RepuestoReparacion rr ON (r.nroReparac = rr.nroReparac)
+GROUP BY distinct r.codRep, r.fecha, r.precio_total, t.nombre
+HAVING COUNT(*)>10;

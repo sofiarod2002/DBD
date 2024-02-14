@@ -1,0 +1,66 @@
+-- Ejercicio 9
+-- 1
+SELECT p.nombreP, p. descripcion, p.fechaInicioP, p.fechaFinP
+FROM Proyecto p
+WHERE (f.fechaFinP)!=null AND f.fechaFinP > p.fechaFinEstimada;
+
+-- 2
+SELECT e.dni, e.nombre, e.apellido, e.telefono, e.direccion, e.fechaIngreso
+FROM Empleado e
+WHERE e.dni NOT IN (
+  SELECT p.dniResponsable
+  FROM Proyecto p
+)
+ORDER BY e.apellido, e.nombre;
+
+-- 3
+SELECT e.dni, e.nombre, e.apellido, e.telefono, e.direccion
+FROM Empleado e
+INNER JOIN Equipo eq ON (eq.dniLider = e.dni)
+GROUP BY e.dni, e.nombre, e.apellido, e.telefono, e.direccion
+HAVING COUNT(*)>1;
+
+-- 4
+SELECT e.dni, e.nombre, e.apellido, e.telefono, e.direccion
+FROM Empleado e
+INNER JOIN EmpleadoEquipo ee ON (e.dni = ee.dni)
+INNER JOIN Proyecto p ON (e.equipoBackend = ee.codEquipo) OR (e.equipoFrontend = ee.codEquipo)
+WHERE (p.nombreP='Protecyo X');
+
+-- 5
+SELECT eq.nombreE, e.nombre, e.apellido, e.telefono, e.direccion
+FROM Empleado e
+INNER JOIN Equipo eq ON (e.dni = eq.dniLider)
+WHERE eq.codEquipo NOT IN (
+  SELECT codEquipo
+  FROM EmpleadoEquipo
+);
+
+-- 6
+UPDATE EMPLEADO SET nombre='Lucia', apellido='Lopez',direccion='Av 8 956' WHERE dni=40568965;
+
+-- 7
+SELECT e.dni, e.nombre, e.apellido, e.telefono, e.direccion
+FROM Empleado e
+INNER JOIN Proyecto p ON (p.dniResponsable = e.dni)
+WHERE e.dni NOT IN (
+  SELECT dniLider
+  FROM Equipo
+);
+
+-- 8 tengo dudas si el where seria asi
+SELECT e.nombreE, e.descripcionTecnologias
+FROM Equipo e
+INNER JOIN Proyecto p ON (e.equipoBackend = p.equipoBackend)
+AND e.codEquipo IN (
+  SELECT eq.codEquipo
+  FROM Equipo eq
+  INNER JOIN Proyecto pr ON (eq.equipoFrontend = pr.equipoFrontend)
+  WHERE (e.codEquipo = eq.codEquipo)
+);
+
+-- 9
+SELECT p.nombreP, p.descripcion, p.fechaInicioP, e.nombre, e.apellido
+FROM Proyecto p
+INNER JOIN Empleado e ON (p.dniResponsable = e.dni)
+WHERE YEAR(p.fechaFinP)=2019;

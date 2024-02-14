@@ -1,0 +1,85 @@
+-- Ejercicio 5
+
+-- 1
+SELECT a.especie, a.años, a.calle, a.nro, l.nombreL
+FROM Arbol a
+INNER JOIN Localidad l ON (l.codigopostal = a.codigopostal)
+INNER JOIN Poda p ON (a.nroArbol = p.nroArbol)
+INNER JOIN Podador po ON (p.dni = po.dni)
+WHERE (po.nombre = 'Juan' AND po.apellido = 'Perez') AND a.nroArbol IN (
+  SELECT ar.nroArbol
+  FROM Arbol ar
+  INNER JOIN Poda p2 ON (ar.nroArbol = p2.nroArbol)
+  INNER JOIN Podador po2 ON (p2.dni = po2.dni)
+  WHERE (po.nombre = 'Jose' AND po.apellido = 'Garcia')
+);
+
+-- 2
+SELECT DISTINCT p.dni, p.apellido, p.fnac, l.nombreL
+FROM Podador p
+INNER JOIN Localidad l ON (p.codigopostalVive = l.codigopostal)
+INNER JOIN Poda pd ON (pd.dni = p.dni)
+WHERE YEAR(p.fecha)=2018;
+
+-- 3 preguntar si esta bien, vi otra solucion que usa un where en la subconsulta
+SELECT a.especie, a.años, a.calle, a.nro, l.nombreL
+FROM Arbol a
+WHERE a.nroArbol NOT IN (
+  SELECT p.nroArbol
+  FROM Poda p
+);
+
+-- 4
+SELECT DISTINCT a.especie, a.años, a.calle, a.nro, l.nombreL
+FROM Arbol a
+INNER JOIN Localidad l ON (l.codigopostal = a.codigopostal)
+INNER JOIN Poda p ON (a.nroArbol = p.nroArbol)
+WHERE YEAR(p.fecha)=2017 AND a.nroArbol NOT IN(
+  SELECT ar.nroArbol
+  FROM Arbol ar
+  INNER JOIN Poda p2 ON (ar.nroArbol = p2.nroArbol)
+  WHERE YEAR(p2.fecha)=2018
+);
+
+-- 5
+SELECT DISTINCT p.dni, p.apellido, p.fnac, l.nombreL
+FROM Podador p
+INNER JOIN Localidad l ON (p.codigopostalVive = l.codigopostal)
+INNER JOIN Poda pd ON (pd.dni = p.dni)
+WHERE YEAR(p.fecha)=2018 AND p.apellido LIKE ('%ata')
+ORDER BY p.apellido, p.nombre;
+
+-- 6
+SELECT p.dni, p.apellido, p.fnac, p.fnac, p.telefono
+FROM Podador p
+INNER JOIN Poda pd ON (pd.dni = p.dni)
+INNER JOIN Arbol a ON (a.nroArbol = pd.nroArbol)
+WHERE a.especie='Coniferas' AND p.dni NOT IN (
+  SELECT  p2.dni
+  FROM Podador p2
+  INNER JOIN Poda pd2 ON (pd2.dni = p2.dni)
+  INNER JOIN Arbol a2 ON (a2.nroArbol = pd2.nroArbol)
+  WHERE a.especie!='Coniferas'
+);
+
+-- 7
+SELECT DISTINCT a.especie
+FROM Arbol a
+INNER JOIN Localidad l ON (l.codigopostal = a.codigopostal)
+WHERE l.nombreL='La Plata' AND a.nroArbol IN(
+  SELECT ar.nroArbol
+  FROM Arbol ar
+  INNER JOIN Localidad l2 ON (l2.codigopostal = ar.codigopostal)
+  WHERE l2.nombreL='Salta'
+);
+
+-- 8
+DELETE FROM Podador WHERE dni=22234566;
+DELETE FROM Poda WHERE dni=22234566;
+
+-- 9
+SELECT l.nombre, l.descripcion, l.habitantes
+FROM Localidad l
+INNER JOIN Arbol a (a.codigopostal = l.codigopostal)
+GROUP BY l.codigopostal, l.nombre, l.descripcion, l.habitantes
+HAVING COUNT (*)<100;

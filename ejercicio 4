@@ -1,0 +1,110 @@
+-- Ejercicio 4
+-- 1
+SELECT a.dni,p.nombre, a.legajo, p.apellido
+FROM Alumno a
+NATURAL JOIN Persona p
+WHERE a.año_ingreso < 2014;
+
+-- 2
+SELECT DISTINCT p.dni, p.matricula, pe.apellido, pe.nombre
+FROM Profesor p
+INNER JOIN Persona pe ON (pe.dni = p.dni)
+INNER JOIN ProfesorCurso pc ON (pc.dni = p.dni)
+INNER JOIN Curso c ON (c.cod_curso = pc.cod_curso)
+WHERE c.duracion > 100
+ORDER BY p.dni;
+
+-- 3
+SELECT a.dni,p.nombre, p.apellido, p.genero, p.fecha_nacimiento
+FROM Alumno a
+INNER JOIN Persona pe ON (a.dni = p.dni)
+INNER JOIN AlumnoCurso ac ON (ac.dni = p.dni)
+INNER JOIN Curso c ON (c.cod_curso = pc.cod_curso)
+WHERE YEAR(ac.fecha)=2019 AND c.nombre = 'Diseño de base de datos';
+
+-- 4 puedo agarrar los datos de alumno directamente de persona?
+SELECT a.dni,p.nombre, p.apellido, ac.calificacion
+FROM Alumno a
+INNER JOIN Persona pe ON (a.dni = p.dni)
+INNER JOIN AlumnoCurso ac ON (ac.dni = p.dni)
+INNER JOIN Curso c ON (c.cod_curso = pc.cod_curso)
+INNER JOIN ProfesorCurso pc ON (pc.dni = p.dni)
+INNER JOIN Profesor pr ON (pr.dni = pc.dni)
+INNER JOIN Persona p2 ON (pr.dni = p2.dni)
+WHERE ac.calificacion > 9 AND (p2.nombre='Juan ' AND p2.apellido= 'Garcia');
+
+-- 5
+SELECT p.dni, p.matricula, pe.apellido, pe.nombre
+FROM Profesor p
+INNER JOIN Persona pe ON (pe.dni = p.dni)
+INNER JOIN TituloProfesor tp ON (p.dni = tp.dni)
+GROUP BY  p.dni, p.matricula, pe.apellido, pe.nombre
+HAVING COUNT(*)>3
+ORDER BY pe.apellido, pe.nombre ;
+
+-- 6
+SELECT p.dni, pe.apellido, pe.nombre, SUM(c.duracion) as cant_horas, AVG(c.duracion) as promedio
+FROM Profesor p
+INNER JOIN Persona pe ON (pe.dni = p.dni)
+INNER JOIN ProfesorCurso pc ON (pc.dni = p.dni)
+INNER JOIN Curso c ON (c.cod_curso = pc.cod_curso)
+GROUP BY p.dni, pe.apellido, pe.nombre;
+
+-- 7
+SELECT c.nombre, c.descripcion
+FROM Curso c
+INNER JOIN AlumnoCurso ac ON (ac.cod_curso = c.cod_curso)
+WHERE ac.año = 2019
+GROUP BY c.cod_curso, c.nombre, c.descripcion
+HAVING COUNT(*)>ALL(
+  SELECT COUNT(*)
+  FROM AlumnoCurso
+  WHERE ac.año = 2019
+  GROUP BY c.cod_curso
+)
+UNION
+  SELECT c.nombre, c.descripcion
+  FROM Curso c
+  INNER JOIN AlumnoCurso ac ON (ac.cod_curso = c.cod_curso)
+  WHERE ac.año = 2019
+  GROUP BY c.cod_curso, c.nombre, c.descripcion
+  HAVING COUNT(*)<ALL(
+    SELECT COUNT(*)
+    FROM AlumnoCurso
+    WHERE ac.año = 2019
+    GROUP BY c.cod_curso
+  )
+
+  -- 8
+  SELECT a.dni, p.apellido, p.nombre
+  FROM Alumno a
+  INNER JOIN Persona p (a.dni = p.dni)
+  INNER JOIN AlumnoCurso ac ON (ac.dni = p.dni)
+  INNER JOIN Curso c ON (c.cod_curso = pc.cod_curso)
+  WHERE ac.año=2018 AND c.nombre LIKE ('%BD%') AND a.dni NOT IN (
+  -- en esta subconsulta creo qeu podria usar solo la tabla alumno curso, es importante reducir el uso de tablas?
+    SELECT a2.dni
+    FROM Alumno a2
+    INNER JOIN AlumnoCurso ac2 ON (ac2.dni = a2.dni)
+    INNER JOIN Curso c2 ON (c2.cod_curso = pc2.cod_curso)
+    WHERE ac.año=2019 AND
+  );
+
+  -- 9
+  INSERT INTO Profesor (dni,matricula,nro_expediente)
+  VALUES (34801956,'MN2547',145);
+  INSERT INTO Titulo (cod_titulo,nombre,descripcion)
+  VALUES (25, 'Historia','UNLP GRADUADO 2020');
+  INSERT INTO TituloProfesor (cod_titulo,dni,fecha)
+  VALUES (25,34801956,2020-01-05);
+
+  -- 10
+  -- esto puede ser asi o hay que hacer una subconsulta buscando en la tabla alumnos?
+  UPDATE Persona
+  SET estado_civil='divorciado'
+  WHERE dni=30568989;
+
+  -- 11
+  DELETE FROM ALUMNO WHERE dni= 30568989;
+  DELETE FROM AlumnoCurso WHERE dni= 30568989;
+  DELETE FROM Persona WHERE dni= 30568989;
