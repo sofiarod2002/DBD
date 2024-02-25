@@ -1,0 +1,57 @@
+-- 2
+SELECT c.cuit, c.nomClte. c,email
+FROM Cliente c
+NATURAL JOIN Pedido p
+WHERE NOT EXISTS (
+  SELECT *
+  FROM Producto prod
+  WHERE NOT EXISTS(
+    SELECT *
+    FROM PedProd pp
+    WHERE (pp.nroPed = p.Ped AND pp.codProd = prod.codProd)
+  )
+);
+
+-- 3
+SELECT p.nroPed, p.fechaPed, prod.codProd, pp.cantPed, ep.nroRemito, ep.cantEnt,e .fechaEnt
+FROM Pedido p
+NATURAL JOIN PedidoProducto pp
+NATURAL JOIN  Producto prod
+NATURAL JOIN Entrega e
+NATURAL JOIN EntregaProducto ep
+WHERE p.fechaPed BETWEEN '2024-01-24' AND '2024-02-24'
+ORDER BY p.nroPed,prod.codProd, e.fechaEnt;
+
+-- 4
+SELECT p.nroPed, p.fechaPed, c.cuit, c.nroClte, p.dirEntrega, pp.codProd, pp.cantPed
+FROM Pedido p
+NATURAL JOIN Cliente c
+NATURAL JOIN Producto
+NATURAL JOIN PedProd pp
+WHERE p.fechaPed BETWEEN '2024-01-24' AND '2024-02-24' AND p.nroPed NOT IN (
+  SELECT nroPed
+  FROM Entrega
+)
+ORDER BY p.nroPed;
+
+-- 5
+SELECT p.nroPed, p.fechaPed, pp.codProd, pp.cantPed, ep.cantEnt
+FROM Pedido p
+NATURAL JOIN Entrega e
+NATURAL JOIN PedidoProducto pp
+NATURAL JOIN Producto prod
+LEFT JOIN EntProd ep ON (ep.codProd = prod.codProd AND ep.nroRemito = e.nroRemito)
+WHERE p.fechaPed BETWEEN '2024-01-24' AND '2024-02-24'
+ORDER BY p.nroPed, prod.codProd;
+
+-- 6
+SELECT c.nroClte, p.nroPed, p.fechaPed, pp.cantPed, SUM (ep.cantEnt*pp.precioU) as monto_total
+FROM Cliente c
+NATURAL JOIN Pedido p
+NATURAL JOIN PedProd pp
+NATURAL JOIN Producto
+NATURAL JOIN Entrega e
+NATURAL JOIN EntProd ep
+WHERE p.fechaPed BETWEEN '2024-01-24' AND '2024-02-24'
+GROUP BY c.nroClte, p.nroPed, p.fechaPed, pp.cantPed
+ORDER BY monto_total DESC;

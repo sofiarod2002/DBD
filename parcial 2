@@ -1,0 +1,77 @@
+-- 1
+SELECT c.nombre, c.apellido
+FROM Cliente c
+NATURAL JOIN viaje v
+INNER JOIN Ciudad ci (v.cpDestino = ci.codigopostal)
+WHERE ci.nombreCiudad LIKE 'San Miguel del Monte' AND c.dni NOT IN(
+  SELECT v.dni
+  FROM Viaje v2
+  INNER JOIN Ciudad ci2 (v2.cpDestino = ci2.codigopostal)
+  WHERE ci.nombreCiudad LIKE 'Las Flores'
+)
+ORDER BY c.apellido, c.nombre;
+
+-- 2
+SELECT c.dni, c.apellido,c.nombre
+FROM Cliente c
+NATURAL JOIN viaje v
+WHERE YEAR(v.fecha)=2017 OR c.dni IN(
+  SELECT v2.dni
+  FROM Viaje v2
+  NATURAL JOIN Agencia a
+  WHERE a.direccion LIKE '50 y 120'
+)
+ORDER BY c.apellido, c.nombre;
+
+-- 3
+DELETE FROM Agencia WHERE razonsocial= 'Los Tilos';
+DELETE FROM Viaje WHERE razonsocial= 'Los Tilos';
+
+-- 4
+SELECT c.nombre, c.apellido, a.telefono, ci.nombreCiudad
+FROM Cliente c
+NATURAL JOIN viaje
+INNER JOIN Ciudad ci (v.cpDestino = ci.codigopostal)
+WHERE ci.nombreCiudad LIKE 'Mar del Plata' AND c.dni NOT IN(
+  SELECT v2.dni
+  FROM Viaje v2
+  INNER JOIN Ciudad ci2 (v2.cpDestino = ci2.codigopostal)
+  WHERE ci2.nombreCiudad LIKE 'Carlos Paz'
+);
+
+-- 5
+SELECT c.codigopostal, c.nombreCiudad, c.anioCreacion
+FROM Ciudad c
+WHERE c.codigopostal NOT IN(
+  SELECT v.cpOrigen
+  FROM Viaje v
+)
+INTERSECT (
+  SELECT c.codigopostal, c.nombreCiudad, c.anioCreacion
+  FROM Ciudad c
+  WHERE c.codigopostal NOT IN(
+    SELECT v.cpDestino
+    FROM Viaje v
+  )
+);
+
+-- 6
+SELECT c.nombre, c.apellido, a.telefono, ci.nombreCiudad
+FROM Cliente c
+NATURAL JOIN viaje v
+GROUP BY c.dni,c.nombre, c.apellido, a.telefono, ci.nombreCiudad
+HAVING COUNT(*)>10
+ORDER BY c.apellido, c.nombre;
+
+-- 7
+SELECT a.razonsocial, a.direccion, a.telefono
+FROM Agencia a
+WHERE NOT EXISTS(
+  SELECT *
+  FROM Ciudad
+  WHERE NOT EXISTS(
+    SELECT *
+    FROM Viaje v
+    WHERE (v.razonsocial = a.razonsocial AND v.cpDestino = c.codigopostal)
+  )
+);

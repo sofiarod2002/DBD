@@ -1,0 +1,21 @@
+-- 1
+SELECT c.nombreCliente, c.fechaNacimiento, c.direccion
+FROM Cliente c
+NATURAL JOIN Alquiler a
+WHERE YEAR(a.fechaAlquiler)=2019;
+
+-- 2
+SELECT c.nomCancha, COUNT(c.idCancha) as cant_alquileres
+FROM Cancha c
+NATURAL JOIN Alquiler a
+NATURAL JOIN Complejo com
+WHERE YEAR(a.fechaAlquiler)=2020 AND com.nomComplejo = 'Complejo 1';
+GROUP BY
+
+-- 3
+SELECT c.nomComplejo
+FROM Complejo c
+NATURAL JOIN Cancha can
+NATURAL JOIN Alquiler a
+WHERE can.valorCancha > 1500
+ORDER BY c.nomComplejo;
